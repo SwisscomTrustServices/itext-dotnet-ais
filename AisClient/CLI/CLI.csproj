@@ -51,8 +51,8 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\AisClient\AIS.csproj">
-      <Project>{6a5db144-711d-424a-b173-08e41795014a}</Project>
+    <ProjectReference Include="..\AIS\AIS.csproj">
+      <Project>{b6ac65f4-f105-4651-928f-1c764345ae20}</Project>
       <Name>AIS</Name>
     </ProjectReference>
   </ItemGroup>
