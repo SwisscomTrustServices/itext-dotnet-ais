@@ -2,5 +2,6 @@
 {
     public class AISSignRequest
     {
+        public SignRequest SignRequest { get; set; }
     }
 }
