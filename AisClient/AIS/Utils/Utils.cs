@@ -1,37 +1,33 @@
 ﻿using System;
-using System.IO;
 
 namespace AIS.Utils
 {
-    public class Utils
+    public static class Utils
     {
-        public static void CopyFileFromClasspathToDisk(string sourceFile, string destFile)
+        public static string GetStringNotNull(string propertyName, string nonNullableString)
         {
-            try
+            if (nonNullableString == null)
             {
-                File.Copy(sourceFile, destFile, false);
-
-            } catch (IOException e)
-            {
-                // throw new AisClientException("Failed to create the file: [" + outputFile + "]");
+                throw new Exception($"Invalid configuration. {propertyName} is missing or empty");
             }
+
+            return nonNullableString;
         }
 
-        public static string CopyFileFromClasspathToString(string inputFile)
+        public static void ValueNotNull(Object value, String errorMessage, Trace trace)
         {
-            try
+            if (value == null)
             {
-                StreamReader reader = new StreamReader(Path.Combine(Environment.CurrentDirectory, inputFile));
-                string text = reader.ReadToEnd();
-                reader.Close();
-                return text;
+                if (trace == null)
+                {
+                    throw new Exception(errorMessage);
+                }
+                else
+                {
+                    throw new Exception(errorMessage + " - " + trace.Id);
+                }
 
-            } catch (IOException e)
-            {
-                // throw new AisClientException("Failed to copy the file: [" + inputFile + "] to string");
             }
-
-            return null;
         }
     }
 }

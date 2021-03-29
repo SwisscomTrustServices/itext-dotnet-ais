@@ -1,14 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
 using AIS;
 using AIS.Model;
 using AIS.Rest;
 using AIS.Rest.Model;
-using AIS.Utils;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Configuration.Json;
+using Newtonsoft.Json;
 
 namespace CLI
 {
@@ -18,7 +15,6 @@ namespace CLI
         private const string PARAM_OUTPUT = "output";
         private const string PARAM_SUFFIX = "suffix";
         private const string PARAM_CONFIG = "config";
-        private const string PARAM_INIT = "init";
         private const string PARAM_TYPE = "type";
         private const string PARAM_HELP = "help";
         private const string PARAM_VERBOSE1 = "v";
@@ -46,8 +42,6 @@ namespace CLI
         private static string type;
         private static int verboseLevel;
 
-        private static IConfiguration config;
-
         static void Main(string[] args)
         {
             startFolder = Environment.CurrentDirectory;
@@ -72,7 +66,8 @@ namespace CLI
 
             IAisClient aisClient = new AisClient();
 
-            UserData userData = new UserData();
+            AisConfiguration aisConfiguration = DeserializeAisConfig();
+            UserData userData = new UserData(aisConfiguration);
 
             List<PdfHandle> documentsToSign = SetDocumentsToSign();
 
@@ -136,11 +131,6 @@ namespace CLI
 
                 switch (currentArg)
                 {
-                    case PARAM_INIT:
-                        {
-                            RunInit();
-                            return;
-                        }
                     case PARAM_HELP:
                         {
                             ShowHelp(null);
@@ -295,35 +285,9 @@ namespace CLI
                 Console.WriteLine(argsValidationError);
             }
 
-            string usageText = Utils.CopyFileFromClasspathToString("cli-files/usage.txt");
+            string usageText = File.ReadAllText("usage.txt");
 
             Console.WriteLine(usageText);
-        }
-
-        private static void RunInit()
-        {
-            string[][] configPairs = {
-                new[]{"cli-files/config.json", "config.json"},
-                new[]{"cli-files/logback-sample.xml", "logback.xml"}
-            };
-
-            foreach (var configPair in configPairs)
-            {
-                string inputFile = configPair[0];
-                string baseOutputFile = configPair[1];
-                string destinationFile = Path.Combine(startFolder, baseOutputFile);
-                if (File.Exists(destinationFile))
-                {
-                    Console.WriteLine("File " + baseOutputFile + " already exists! Will not be overridden!");
-                    return;
-                }
-                Console.WriteLine("Writing " + baseOutputFile + " to " + destinationFile);
-                Utils.CopyFileFromClasspathToDisk(Path.Combine(startFolder, inputFile), destinationFile);
-            }
-
-            config = new ConfigurationBuilder()
-                .AddJsonFile("config.json", optional: false, reloadOnChange: true)
-                .Build();
         }
 
         private static List<PdfHandle> SetDocumentsToSign()
@@ -356,6 +320,13 @@ namespace CLI
             }
 
             return inputFileName.Substring(0, lastDotIndex) + finalSuffix + inputFileName.Substring(lastDotIndex);
+        }
+
+        private static AisConfiguration DeserializeAisConfig()
+        {
+            string aisConfig = File.ReadAllText("AisConfig.Json");
+
+            return JsonConvert.DeserializeObject<AisConfiguration>(aisConfig);
         }
     }
 }
