@@ -1,4 +1,7 @@
 ﻿using AIS;
+using AIS.Rest;
+using AIS.Rest.Model.SignRequest;
+using AIS.Utils;
 
 namespace CLI
 {
@@ -7,6 +10,8 @@ namespace CLI
         static void Main(string[] args)
         {
             IAisClient aisClient = new AisClient();
+            RestClient r = new RestClient();
+            r.RequestSignature(new AISSignRequest(), new Trace("dfdf"));
         }
     }
 }
