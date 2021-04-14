@@ -4,32 +4,32 @@ using System.IO;
 using AIS;
 using AIS.Model;
 using AIS.Rest;
-using AIS.Rest.Model;
+using AIS.Utils;
 using Newtonsoft.Json;
 
 namespace CLI
 {
     class Cli
     {
-        private const string PARAM_INPUT = "input";
-        private const string PARAM_OUTPUT = "output";
-        private const string PARAM_SUFFIX = "suffix";
-        private const string PARAM_CONFIG = "config";
-        private const string PARAM_TYPE = "type";
-        private const string PARAM_HELP = "help";
-        private const string PARAM_VERBOSE1 = "v";
-        private const string PARAM_VERBOSE2 = "vv";
-        private const string PARAM_VERBOSE3 = "vvv";
+        private const string ParamInput = "input";
+        private const string ParamOutput = "output";
+        private const string ParamSuffix = "suffix";
+        private const string ParamConfig = "config";
+        private const string ParamType = "type";
+        private const string ParamHelp = "help";
+        private const string ParamVerbose1 = "v";
+        private const string ParamVerbose2 = "vv";
+        private const string ParamVerbose3 = "vvv";
 
-        private const string SEPARATOR =
+        private const string Separator =
             "--------------------------------------------------------------------------------";
 
-        private const string SUFFIX_DEFAULT = "-signed-#time";
+        private const string SuffixDefault = "-signed-#time";
 
-        private const string TYPE_STATIC = "static";
-        private const string TYPE_ON_DEMAND = "ondemand";
-        private const string TYPE_ON_DEMAND_STEP_UP = "ondemand-stepup";
-        private const string TYPE_TIMESTAMP = "timestamp";
+        private const string TypeStatic = "static";
+        private const string TypeOnDemand = "ondemand";
+        private const string TypeOnDemandStepUp = "ondemand-stepup";
+        private const string TypeTimestamp = "timestamp";
 
         //private static ClientVersionProvider versionProvider;
         private static bool continueExecution;
@@ -47,12 +47,12 @@ namespace CLI
             startFolder = Environment.CurrentDirectory;
 
             ParseArguments(args);
-            if (!continueExecution)
-            {
-                return;
-            }
+            //if (!continueExecution)
+            //{
+            //    return;
+            //}
 
-            Console.WriteLine(SEPARATOR);
+            Console.WriteLine(Separator);
             Console.WriteLine("Starting with following parameters:");
             Console.WriteLine("Config            : " + configFile);
             Console.WriteLine("Input file(s)     : " + string.Join(", ", InputFileList));
@@ -60,36 +60,37 @@ namespace CLI
             Console.WriteLine("Suffix            : " + suffix);
             Console.WriteLine("Type of signature : " + type);
             Console.WriteLine("Verbose level     : " + verboseLevel);
-            Console.WriteLine(SEPARATOR);
+            Console.WriteLine(Separator);
 
-            IRestClient restClient = new RestClient();
-
-            IAisClient aisClient = new AisClient();
-
-            AisConfiguration aisConfiguration = DeserializeAisConfig();
-            UserData userData = new UserData(aisConfiguration);
+            ConfigurationProperties configurationProperties = DeserializeConfig();
+            UserData userData = new UserData(configurationProperties);
+            RestClientConfiguration restClientConfiguration = new RestClientConfiguration();
+            restClientConfiguration.SetFromConfiguration(configurationProperties);
+            RestClient restClient = new RestClient();
+            restClient.SetConfiguration(restClientConfiguration);
+            IAisClient aisClient = new AisClient(restClient);
 
             List<PdfHandle> documentsToSign = SetDocumentsToSign();
 
             SignatureResult result;
             switch (type)
             {
-                case TYPE_STATIC:
+                case TypeStatic:
                 {
                     result = aisClient.SignWithStaticCertificate(documentsToSign, userData);
                     break;
                 }
-                case TYPE_ON_DEMAND:
+                case TypeOnDemand:
                 {
                     result = aisClient.SignWithOnDemandCertificate(documentsToSign, userData);
                     break;
                 }
-                case TYPE_ON_DEMAND_STEP_UP:
+                case TypeOnDemandStepUp:
                 {
                     result = aisClient.SignWithOnDemandCertificateAndStepUp(documentsToSign, userData);
                     break;
                 }
-                case TYPE_TIMESTAMP:
+                case TypeTimestamp:
                 {
                     result = aisClient.Timestamp(documentsToSign, userData);
                     break;
@@ -100,9 +101,9 @@ namespace CLI
                 }
             }
 
-            Console.WriteLine(SEPARATOR);
+            Console.WriteLine(Separator);
             Console.WriteLine("Final result: " + result);
-            Console.WriteLine(SEPARATOR);
+            Console.WriteLine(Separator);
         }
 
         private static void ParseArguments(string[] args)
@@ -131,12 +132,12 @@ namespace CLI
 
                 switch (currentArg)
                 {
-                    case PARAM_HELP:
+                    case ParamHelp:
                         {
                             ShowHelp(null);
                             return;
                         }
-                    case PARAM_VERBOSE1:
+                    case ParamVerbose1:
                         {
                             if (verboseLevel < 1)
                             {
@@ -145,7 +146,7 @@ namespace CLI
 
                             break;
                         }
-                    case PARAM_VERBOSE2:
+                    case ParamVerbose2:
                         {
                             if (verboseLevel < 2)
                             {
@@ -154,7 +155,7 @@ namespace CLI
 
                             break;
                         }
-                    case PARAM_VERBOSE3:
+                    case ParamVerbose3:
                         {
                             if (verboseLevel < 3)
                             {
@@ -163,7 +164,7 @@ namespace CLI
 
                             break;
                         }
-                    case PARAM_INPUT:
+                    case ParamInput:
                         {
                             if (argIndex + 1 < args.Length)
                             {
@@ -177,7 +178,7 @@ namespace CLI
 
                             break;
                         }
-                    case PARAM_OUTPUT:
+                    case ParamOutput:
                         {
                             if (argIndex + 1 < args.Length)
                             {
@@ -191,7 +192,7 @@ namespace CLI
 
                             break;
                         }
-                    case PARAM_SUFFIX:
+                    case ParamSuffix:
                         {
                             if (argIndex + 1 < args.Length)
                             {
@@ -205,7 +206,7 @@ namespace CLI
 
                             break;
                         }
-                    case PARAM_CONFIG:
+                    case ParamConfig:
                         {
                             if (argIndex + 1 < args.Length)
                             {
@@ -220,7 +221,7 @@ namespace CLI
 
                             break;
                         }
-                    case PARAM_TYPE:
+                    case ParamType:
                         {
                             if (argIndex + 1 < args.Length)
                             {
@@ -254,7 +255,7 @@ namespace CLI
 
             if (outputFile == null && suffix == null)
             {
-                suffix = SUFFIX_DEFAULT;
+                suffix = SuffixDefault;
             }
 
             if (outputFile != null && InputFileList.Count > 1)
@@ -322,11 +323,11 @@ namespace CLI
             return inputFileName.Substring(0, lastDotIndex) + finalSuffix + inputFileName.Substring(lastDotIndex);
         }
 
-        private static AisConfiguration DeserializeAisConfig()
+        private static ConfigurationProperties DeserializeConfig()
         {
-            string aisConfig = File.ReadAllText("AisConfig.Json");
+            string aisConfig = File.ReadAllText("ais-config.Json");
 
-            return JsonConvert.DeserializeObject<AisConfiguration>(aisConfig);
+            return JsonConvert.DeserializeObject<ConfigurationProperties>(aisConfig);
         }
     }
 }

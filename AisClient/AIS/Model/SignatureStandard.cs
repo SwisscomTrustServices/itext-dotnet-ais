@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace AIS.Model
 {
@@ -44,7 +43,7 @@ namespace AIS.Model
          */
         public static readonly string Plain = "PLAIN";
 
-        public static readonly List<string> SignatureStandards = new List<string>
+        private static readonly List<string> SignatureStandards = new List<string>
         {
             Default,
             Cades,
@@ -54,11 +53,19 @@ namespace AIS.Model
             Plain
         };
 
-        public readonly string Standard;
+        public readonly string Value;
 
-        public SignatureStandard(string standard)
+        public SignatureStandard(string value)
         {
-            Standard = standard;
+
+            if (!string.IsNullOrEmpty(value) && SignatureStandards.Contains(value))
+            {
+                Value = value;
+            }
+            else
+            {
+                throw new ArgumentException("Invalid signature standard value: " + value);
+            }
         }
     }
 }

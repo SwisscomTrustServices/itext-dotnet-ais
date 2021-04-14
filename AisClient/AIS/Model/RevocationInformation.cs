@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace AIS.Model
 {
@@ -57,7 +56,7 @@ namespace AIS.Model
          */
         public static readonly string Plain = "PLAIN";
 
-        public static readonly List<string> RevocationInformations = new List<string>
+        private static readonly List<string> RevocationInformations = new List<string>
         {
             Default,
             Cades,
@@ -68,11 +67,18 @@ namespace AIS.Model
             Plain
         };
 
-        public readonly string RevocationInfo;
+        public readonly string Value;
 
-        public RevocationInformation(string revocationInfo)
+        public RevocationInformation(string value)
         {
-            RevocationInfo = revocationInfo;
+            if (!string.IsNullOrEmpty(value) && RevocationInformations.Contains(value))
+            {
+                Value = value;
+            }
+            else
+            {
+                throw new ArgumentException("Invalid revocation information value: " + value);
+            }
         }
 
     }

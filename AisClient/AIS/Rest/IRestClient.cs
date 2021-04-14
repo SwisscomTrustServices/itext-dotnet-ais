@@ -1,6 +1,6 @@
-﻿using AIS.Rest.Model.PendingRequest;
-using AIS.Rest.Model.SignRequest;
-using AIS.Rest.Model.SignResponse;
+﻿using AIS.Model.Rest.PendingRequest;
+using AIS.Model.Rest.SignRequest;
+using AIS.Model.Rest.SignResponse;
 using AIS.Utils;
 
 namespace AIS.Rest
