@@ -17,44 +17,41 @@ namespace AIS.Rest
 
         public string ClientCertificateFile { get; set; }
 
-        public string ServerCertificateFile { get; set; }
+        public int MaxConnectionsPerServer { get; set; }
 
-        public int MaxTotalConnections { get; set; }
+        public int RequestTimeoutInSec { get; set; }
 
-        public int MaxConnectionsPerRoute { get; set; }
+        public bool SkipServerCertificateValidation { get; set; }
 
-        public int ConnectionTimeoutInSec { get; set; }
-
-        public int ResponseTimeoutInSec { get; set; }
-
-        public void SetFromConfigurationFile(string filePath)
+        public RestClientConfiguration(string filePath)
         {
             string config = File.ReadAllText(filePath);
-            SetFromConfiguration(JsonConvert.DeserializeObject<ConfigurationProperties>(config));
+            LoadConfiguration(JsonConvert.DeserializeObject<ConfigurationProperties>(config));
         }
 
-        public void SetFromConfiguration(ConfigurationProperties configuration)
+        public RestClientConfiguration(ConfigurationProperties configurationProperties)
+        {
+           LoadConfiguration(configurationProperties);
+        }
+
+        private void LoadConfiguration(ConfigurationProperties configuration)
         {
             RestServiceSignUrl = ConfigParser.GetStringNotNull("ServerRestSignUrl", configuration.ServerRestSignUrl);
             RestServicePendingUrl = ConfigParser.GetStringNotNull("ServerRestPendingUrl", configuration.ServerRestPendingUrl);
             ClientKeyFile = ConfigParser.GetStringNotNull("ClientAuthKeyFile", configuration.ClientAuthKeyFile);
             ClientKeyPassword = configuration.ClientAuthKeyPassword;
             ClientCertificateFile = ConfigParser.GetStringNotNull("ClientCertFile", configuration.ClientCertFile);
-            ServerCertificateFile = ConfigParser.GetStringNotNull("ServerCertFile", configuration.ServerCertFile);
-            MaxTotalConnections = ConfigParser.GetIntNotNull("ClientHttpMaxTotalConnections", configuration.ClientHttpMaxTotalConnections);
-            MaxConnectionsPerRoute = ConfigParser.GetIntNotNull("ClientHttpMaxConnectionsPerRoute", configuration.ClientHttpMaxConnectionsPerRoute);
-            ConnectionTimeoutInSec = ConfigParser.GetIntNotNull("", configuration.ClientHttpConnectionTimeoutInSeconds);
-            ResponseTimeoutInSec = ConfigParser.GetIntNotNull("ClientHttpResponseTimeoutInSeconds", configuration.ClientHttpResponseTimeoutInSeconds);
+            MaxConnectionsPerServer = ConfigParser.GetIntNotNull("ClientHttpMaxConnectionsPerRoute", configuration.ClientHttpMaxConnectionsPerServer);
+            RequestTimeoutInSec = ConfigParser.GetIntNotNull("ClientHttpResponseTimeoutInSeconds", configuration.ClientHttpRequestTimeoutInSeconds);
+            SkipServerCertificateValidation = configuration.SkipServerCertificateValidation;
 
             ValidateFieldVales();
         }
 
         private void ValidateFieldVales()
         {
-            Validator.AssertIntValueBetween(MaxTotalConnections, 2, 100, "The MaxTotalConnections parameter of the REST client configuration must be between 2 and 100", null);
-            Validator.AssertIntValueBetween(MaxConnectionsPerRoute, 2, 100, "The MaxConnectionsPerRoute parameter of the REST client configuration must be between 2 and 100", null);
-            Validator.AssertIntValueBetween(ConnectionTimeoutInSec, 2, 100, "The ConnectionTimeoutInSec parameter of the REST client configuration must be between 2 and 100", null);
-            Validator.AssertIntValueBetween(ResponseTimeoutInSec, 2, 100, "The ResponseTimeoutInSec parameter of the REST client configuration must be between 2 and 100", null);
+            Validator.AssertIntValueBetween(MaxConnectionsPerServer, 2, 100, "The MaxConnectionsPerRoute parameter of the REST client configuration must be between 2 and 100", null);
+            Validator.AssertIntValueBetween(RequestTimeoutInSec, 2, 100, "The ResponseTimeoutInSec parameter of the REST client configuration must be between 2 and 100", null);
         }
     }
 

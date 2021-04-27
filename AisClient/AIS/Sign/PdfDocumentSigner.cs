@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using AIS.Common;
 using iText.Kernel.Pdf;
 using iText.Signatures;
 
@@ -36,7 +37,7 @@ namespace AIS.Sign
             var authorizedSignature = externalSignatureContainer.Sign(dataRangeStream);
             if (estimatedSize < authorizedSignature.Length)
             {
-                throw new Exception("Not enough space");
+                throw new AisClientException("Not enough space");
             }
 
             byte[] paddedSignature = new byte[estimatedSize];

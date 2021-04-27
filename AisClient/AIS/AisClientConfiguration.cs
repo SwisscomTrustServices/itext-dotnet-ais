@@ -11,18 +11,25 @@ namespace AIS
 
         public int SignaturePollingRounds { get; set; }
 
-        public void SetFromConfigurationFile(string filePath)
+        public string LicenseFilePath { get; set; }
+
+
+        public AisClientConfiguration(ConfigurationProperties properties)
+        {
+            LoadConfiguration(properties);
+        }
+        public AisClientConfiguration(string filePath)
         {
             string config = File.ReadAllText(filePath);
-            SetFromConfiguration(JsonConvert.DeserializeObject<ConfigurationProperties>(config));
+            LoadConfiguration(JsonConvert.DeserializeObject<ConfigurationProperties>(config));
         }
 
-        public void SetFromConfiguration(ConfigurationProperties configuration)
+        private void LoadConfiguration(ConfigurationProperties configuration)
         {
 
             SignaturePollingIntervalInSeconds = ConfigParser.GetIntNotNull("ClientPollIntervalInSeconds", configuration.ClientPollIntervalInSeconds);
             SignaturePollingRounds = ConfigParser.GetIntNotNull("ClientPollRounds", configuration.ClientPollRounds);
-
+          //  LicenseFilePath = ConfigParser.GetStringNotNull("ITextLicenseFilePath", configuration.ITextLicenseFilePath); TODO
             ValidateFieldVales();
         }
 

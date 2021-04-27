@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using AIS.Common;
 using AIS.Model.Rest;
 using AIS.Model.Rest.SignResponse;
 
@@ -9,22 +10,12 @@ namespace AIS.Utils
     {
         public static List<string> ExtractScCRLs(AISSignResponse response)
         {
-            var result = new List<string>();
-            if (response?.SignResponse?.OptionalOutputs?.ScRevocationInformation?.ScCRLs?.ScCRL != null)
-            {
-                result.AddRange(response.SignResponse.OptionalOutputs.ScRevocationInformation.ScCRLs.ScCRL);
-            }
-            return result;
+            return response?.SignResponse?.OptionalOutputs?.ScRevocationInformation?.ScCRLs?.ScCRL;
         }
 
         public static List<string> ExtractScOCSPs(AISSignResponse response)
         {
-            var result = new List<string>();
-            if (response?.SignResponse?.OptionalOutputs?.ScRevocationInformation?.ScOCSPs?.ScOCSP != null)
-            {
-                result.AddRange(response.SignResponse.OptionalOutputs.ScRevocationInformation.ScOCSPs.ScOCSP);
-            }
-            return result;
+            return response?.SignResponse?.OptionalOutputs?.ScRevocationInformation?.ScOCSPs?.ScOCSP;
         }
 
         public static bool IsResponseAsyncPending(AISSignResponse response)
@@ -55,7 +46,7 @@ namespace AIS.Utils
             return response.SignResponse.OptionalOutputs.ScStepUpAuthorisationInfo.ScResult.ScConsentURL;
         }
 
-        public static string getResponseId(AISSignResponse response)
+        public static string GetAsyncResponseId(AISSignResponse response)
         {
             return response.SignResponse.OptionalOutputs.AsyncResponseID;
         }
@@ -70,7 +61,7 @@ namespace AIS.Utils
                     return seSignatureObject;
                 }
             }
-            throw new Exception($"Invalid AIS response. Cannot find the extended signature object for document with ID=[{documentId}]");
+            throw new AisClientException($"Invalid AIS response. Cannot find the extended signature object for document with ID=[{documentId}]");
         }
     }
 }

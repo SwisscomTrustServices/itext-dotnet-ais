@@ -30,7 +30,14 @@ namespace AIS.Model
         /**
          * The user failed to properly authenticate for the signature.
          */
-        UserAuthenticationFailed
+        UserAuthenticationFailed,
+
+        /**
+        * The request is missing the required MSISDN parameter. This can happen sometimes in the context of the on-demand flow,
+        * depending on the user's server configuration (e.g. the enforceStepUpAuthentication flag is true). As an alternative,
+        * the on-demand with step-up flow can be used instead.
+     */
+        InsufficientDataWithAbsentMsisdn
     }
 
 }

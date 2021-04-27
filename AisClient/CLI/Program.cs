@@ -5,6 +5,8 @@ using AIS;
 using AIS.Model;
 using AIS.Rest;
 using AIS.Utils;
+using Common.Logging;
+using Common.Logging.Simple;
 using Newtonsoft.Json;
 
 namespace CLI
@@ -44,6 +46,8 @@ namespace CLI
 
         static void Main(string[] args)
         {
+            //TODO versioning and verbosity configuration
+           LogManager.Adapter = new ConsoleOutLoggerFactoryAdapter{Level = LogLevel.Debug};
             startFolder = Environment.CurrentDirectory;
 
             ParseArguments(args);
@@ -64,11 +68,11 @@ namespace CLI
 
             ConfigurationProperties configurationProperties = DeserializeConfig();
             UserData userData = new UserData(configurationProperties);
-            RestClientConfiguration restClientConfiguration = new RestClientConfiguration();
-            restClientConfiguration.SetFromConfiguration(configurationProperties);
-            RestClient restClient = new RestClient();
-            restClient.SetConfiguration(restClientConfiguration);
-            IAisClient aisClient = new AisClient(restClient);
+            userData.ConsentUrlCallback.OnConsentUrlReceived += LogAtConsole;
+            RestClientConfiguration restClientConfiguration = new RestClientConfiguration(configurationProperties);
+            IRestClient restClient = new RestClient(restClientConfiguration);
+          
+            IAisClient aisClient = new AisClient(restClient, new AisClientConfiguration(configurationProperties));
 
             List<PdfHandle> documentsToSign = SetDocumentsToSign();
 
@@ -104,6 +108,11 @@ namespace CLI
             Console.WriteLine(Separator);
             Console.WriteLine("Final result: " + result);
             Console.WriteLine(Separator);
+        }
+
+        private static void LogAtConsole(object sender, OnConsentUrlReceivedArgs e)
+        {
+            Console.WriteLine("Consent URL: " + e.Url);
         }
 
         private static void ParseArguments(string[] args)

@@ -22,7 +22,7 @@ namespace AIS.Sign
 
         public void ModifySigningDictionary(PdfDictionary signDic)
         {
-            signatureDictionary.PutAll(signDic);
+            signDic.PutAll(signatureDictionary);
         }
     }
 }

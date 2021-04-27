@@ -1,15 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using AIS.Common;
 using AIS.Model;
 using AIS.Model.Rest;
 using AIS.Sign;
 using AIS.Utils;
 using iText.Kernel.Pdf;
 using iText.Signatures;
-using System;
-using System.Security.Cryptography.X509Certificates;
 using Org.BouncyCastle.Asn1.X509;
+using Org.BouncyCastle.Ocsp;
 using Org.BouncyCastle.X509;
 using static System.String;
 
@@ -33,11 +34,13 @@ namespace AIS
         private MemoryStream inMemoryStream;
         private PdfDocumentSigner pdfSigner;
         private PdfDocument pdfDocument;
+        private string outputFile;
         private byte[] documentHash;
 
-        public PdfDocumentHandler(byte[] input, Trace trace)
+        public PdfDocumentHandler(string inputFile, string outputFile, Trace trace)
         {
-            contentIn = input;
+            contentIn = File.ReadAllBytes(inputFile);
+            this.outputFile = outputFile;
             this.trace = trace;
         }
 
@@ -45,10 +48,12 @@ namespace AIS
         {
             DigestAlgorithm = algorithm;
             Id = GenerateDocumentId();
+
             pdfDocument = new PdfDocument(new PdfReader(new MemoryStream(contentIn)));
             SignatureUtil signatureUtil = new SignatureUtil(pdfDocument);
             var hasSignature = signatureUtil.GetSignatureNames().Count > 0;
-            pdfReader = new PdfReader(new MemoryStream(contentIn));
+
+            pdfReader = new PdfReader(new MemoryStream(contentIn), new ReaderProperties());
             inMemoryStream = new MemoryStream();
             pdfWriter = new PdfWriter(inMemoryStream, new WriterProperties().AddXmpMetadata().SetPdfVersion(PdfVersion.PDF_1_0));
             StampingProperties stampingProperties = new StampingProperties();
@@ -69,11 +74,11 @@ namespace AIS
             Base64HashToSign = Convert.ToBase64String(hash, 0, hash.Length);
         }
 
-        public byte[] CreateSignedPdf(byte[] externalsignature, int estimatedSize, List<string> encodedCrlEntries, List<string> encodedOcspEntries)
+        public void CreateSignedPdf(byte[] externalsignature, int estimatedSize, List<string> encodedCrlEntries, List<string> encodedOcspEntries)
         {
             if (pdfSigner.GetCertificationLevel() == PdfSigner.CERTIFIED_NO_CHANGES_ALLOWED)
             {
-                throw new Exception($"Could not apply signature because source file contains a certification " +
+                throw new AisClientException($"Could not apply signature because source file contains a certification " +
                                     $"that does not allow any changes to the document with id {Id}");
             }
 
@@ -82,7 +87,7 @@ namespace AIS
                              "] - {}";
             if (estimatedSize < externalsignature.Length)
             {
-                throw new Exception($"Not enough space for signature in the document with id {trace.Id}. The estimated size needs to be " +
+                throw new AisClientException($"Not enough space for signature in the document with id {trace.Id}. The estimated size needs to be " +
                                     $" increased with {externalsignature.Length - estimatedSize} bytes.");
             }
 
@@ -91,13 +96,13 @@ namespace AIS
                 pdfSigner.SignWithAuthorizedSignature(new PdfSignatureContainer(externalsignature), estimatedSize);
                 if (encodedOcspEntries != null || encodedCrlEntries != null)
                 {
-                    return ExtendDocumentWithCrlOcspMetadata(new MemoryStream(inMemoryStream.ToArray()), encodedCrlEntries,
+                    ExtendDocumentWithCrlOcspMetadata(new MemoryStream(inMemoryStream.ToArray()), encodedCrlEntries,
                         encodedOcspEntries);
                 }
                 else
                 {
                     //TODO log info
-                    return inMemoryStream.ToArray();
+                    File.WriteAllBytes(outputFile, inMemoryStream.ToArray());
                 }
 
             }
@@ -112,9 +117,28 @@ namespace AIS
             }
         }
 
-        private byte[] ExtendDocumentWithCrlOcspMetadata(MemoryStream documentStream, List<string> encodedCrlEntries, List<string> encodedOcspEntries)
+        private void ExtendDocumentWithCrlOcspMetadata(MemoryStream documentStream, List<string> encodedCrlEntries, List<string> encodedOcspEntries)
         {
-            throw new NotImplementedException();
+            List<byte[]> crl = encodedCrlEntries != null ? encodedCrlEntries.Select(MapEncodedCrl).ToList() : new List<byte[]>();
+            List<byte[]> ocsp = encodedOcspEntries != null ? encodedOcspEntries.Select(MapEncodedOcsp).ToList() : new List<byte[]>();
+
+            try
+            {
+                PdfReader reader = new PdfReader(documentStream);
+                PdfWriter writer = new PdfWriter(File.OpenWrite(outputFile));
+                PdfDocument document = new PdfDocument(reader, writer, new StampingProperties().PreserveEncryption().UseAppendMode());
+                LtvVerification validation = new LtvVerification(document);
+                IList<string> signatureNames = new SignatureUtil(document).GetSignatureNames();
+                string signatureName = signatureNames[signatureNames.Count - 1];
+                bool x = validation.AddVerification(signatureName, ocsp, crl, null);
+                validation.Merge();
+                document.Close();
+                //TODO log
+            }
+            catch (Exception e)
+            {
+                throw new AisClientException($"Failed to embed the signature(s) in the document(s) and close the streams - {trace.Id}");
+            }
         }
 
         private string GetOptionalAttribute(string attribute)
@@ -126,19 +150,36 @@ namespace AIS
             return "DOC-" + Guid.NewGuid();
         }
 
-        //private byte[] MapEncodedCrl(String encodedCrl)
-        //{
-        //    try
-        //    {
-        //        MemoryStream inputStream = new MemoryStream(Convert.FromBase64String(encodedCrl));
-        //        X509Crl x509Crl = new X509Crl(new CertificateList());
-        //    }
-        //    catch (Exception e)
-        //    {
+        private byte[] MapEncodedCrl(String encodedCrl)
+        {
+            try
+            {
+                MemoryStream inputStream = new MemoryStream(Convert.FromBase64String(encodedCrl));
+                X509Crl x509Crl = new X509CrlParser().ReadCrl(inputStream);
+                //TODO log
+                return x509Crl.GetEncoded();
+            }
+            catch (Exception e)
+            {
+                throw new AisClientException($"Failed to map the received encoded CRL entry - {trace.Id}", e);
+            }
+        }
 
-        //    }
-        //    return new byte[10];
-        //}
+        private byte[] MapEncodedOcsp(String encodedOcsp)
+        {
+            try
+            {
+                MemoryStream inputStream = new MemoryStream(Convert.FromBase64String(encodedOcsp));
+                OcspResp ocspResp = new OcspResp(inputStream);
+                BasicOcspResp basicOcspResp = (BasicOcspResp)ocspResp.GetResponseObject();
+                //TODO log
+                return basicOcspResp.GetEncoded();
+            }
+            catch (Exception e)
+            {
+                throw new AisClientException($"Failed to map the received encoded OCSP entry - {trace.Id}", e);
+            }
+        }
 
         public void Close()
         {
@@ -158,6 +199,5 @@ namespace AIS
                // TODO processingLogger.debug("Failed to close the resource - {}. Reason: {}", trace.getId(), e.getMessage());
             }
         }
-
     }
 }

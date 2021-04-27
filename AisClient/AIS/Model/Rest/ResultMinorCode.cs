@@ -1,4 +1,7 @@
-﻿namespace AIS.Model.Rest
+﻿using System.Collections.Generic;
+using System.Linq;
+
+namespace AIS.Model.Rest
 {
     public class ResultMinorCode
     {
@@ -61,15 +64,52 @@
 
         public readonly string Description;
 
+        private static readonly List<ResultMinorCode> ResultMinorCodes = new List<ResultMinorCode>
+        {
+            AuthenticationFailed,
+            CantServeTimely,
+            InsufficientData,
+            ServiceInactive,
+            SignatureError,
+            SerialNumberMismatch,
+            ServiceError,
+            StepupInvalidStatus,
+            StepupTimeout,
+            StepupCancel,
+            TimestampError,
+            UnexpectedData,
+            UnknownCustomer,
+            UnknownServiceEntity,
+            UnsupportedDigestAlgorithm,
+            UnsupportedProfile,
+            StepupTransportError,
+            GeneralError
+        };
+
         public ResultMinorCode(string uri, string description)
         {
             Uri = uri;
             Description = description;
         }
 
-        public static ResultMinorCode GetByUri(string resultResultMinor)
+        public static ResultMinorCode GetByUri(string uri)
         {
-            throw new System.NotImplementedException();
+            return ResultMinorCodes.FirstOrDefault(rmc => rmc.Uri == uri);
+        }
+
+        private bool Equals(ResultMinorCode other)
+        {
+            return other?.Uri == Uri;
+        }
+
+        public override bool Equals(object obj)
+        {
+            return Equals(obj as ResultMinorCode);
+        }
+
+        public override int GetHashCode()
+        {
+            return (Uri != null ? Uri.GetHashCode() : 0);
         }
     }
 }

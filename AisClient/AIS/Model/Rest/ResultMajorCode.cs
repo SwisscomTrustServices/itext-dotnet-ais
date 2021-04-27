@@ -1,4 +1,7 @@
-﻿namespace AIS.Model.Rest
+﻿using System.Collections.Generic;
+using System.Linq;
+
+namespace AIS.Model.Rest
 {
     public class ResultMajorCode
     {
@@ -21,15 +24,39 @@
 
         public readonly string Description;
 
+        private static readonly List<ResultMajorCode> ResultMajorCodes = new List<ResultMajorCode>
+        {
+            SubsystemError,
+            Pending,
+            RequesterError,
+            ResponderError,
+            Success
+        };
+
         public ResultMajorCode(string uri, string description)
         {
             Uri = uri;
             Description = description;
         }
 
-        public static ResultMajorCode GetByUri(string resultResultMajor)
+        public static ResultMajorCode GetByUri(string uri)
         {
-            throw new System.NotImplementedException();
+            return ResultMajorCodes.FirstOrDefault(rmc => rmc.Uri == uri);
+        }
+
+        private bool Equals(ResultMajorCode other)
+        {
+            return other?.Uri == Uri;
+        }
+
+        public override bool Equals(object obj)
+        {
+            return Equals(obj as ResultMajorCode);
+        }
+
+        public override int GetHashCode()
+        {
+            return (Uri != null ? Uri.GetHashCode() : 0);
         }
     }
 }
