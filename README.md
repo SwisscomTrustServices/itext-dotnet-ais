@@ -4,7 +4,7 @@
 
 # Demo Video: .Net client
 
-* current code is available in the development branch. The final code version will be available in approx 10 days.
+* __Current source code is available in the development branch. The final source code version will be available in the main branch too in approx 10 days.__
 
 * https://swisscom-my.sharepoint.com/:v:/p/paul_muntean/EQG2JYWKJvFHqiwefyQGiQgBBITIJt2PHkxH9zs-MdbcJw?e=pjqaoE
 
