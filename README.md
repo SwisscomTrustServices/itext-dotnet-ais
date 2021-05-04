@@ -10,4 +10,4 @@
 
 or alternativelly if you cannot access the first link, you need to download the raw video file using the following link.
 
-https://github.com/SwisscomTrustServices/itext-dotnet-ais/blob/main/Demo%20the%20.Net%20client.mp4
+* https://github.com/SwisscomTrustServices/itext-dotnet-ais/blob/main/Demo%20the%20.Net%20client.mp4
