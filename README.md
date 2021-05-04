@@ -2,12 +2,12 @@
 
 * .NET client library for Swisscom All-In Signing Service.
 
-# Demo Video
+# Demo Video: .Net client
 
-* todo, will be done on the 5.05.2021.
+* current code is available in the development branch. The final code version will be available in approx 10 days.
 
-* todo link 1
+* https://swisscom-my.sharepoint.com/:v:/p/paul_muntean/EQG2JYWKJvFHqiwefyQGiQgBBITIJt2PHkxH9zs-MdbcJw?e=pjqaoE
 
 or alternativelly if you cannot access the first link, you need to download the raw video file using the following link.
 
-* todo link 2
+https://github.com/SwisscomTrustServices/itext-dotnet-ais/blob/main/Demo%20the%20.Net%20client.mp4
