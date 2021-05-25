@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using AIS.Common;
 using AIS.Model.Rest;
 using AIS.Model.Rest.SignResponse;

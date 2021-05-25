@@ -11,6 +11,7 @@ using AIS.Model.Rest.SignResponse;
 using AIS.Rest;
 using AIS.Utils;
 using Common.Logging;
+using iText.License;
 
 namespace AIS
 {
@@ -20,6 +21,7 @@ namespace AIS
         private readonly IRestClient restClient;
         private readonly AisClientConfiguration aisClientConfiguration;
         private static ILog logger = LogManager.GetLogger<AisClient>();
+
         public AisClient(IRestClient restClient, AisClientConfiguration aisClientConfiguration)
         {
             this.restClient = restClient;
@@ -29,7 +31,23 @@ namespace AIS
 
         private void LoadLicense()
         {
-            
+            if (string.IsNullOrEmpty(aisClientConfiguration.LicenseFilePath))
+            {
+                return;
+            }
+
+            try
+            {
+                LicenseKey.LoadLicenseFile(aisClientConfiguration.LicenseFilePath);
+                LicenseKey.ScheduledCheck(null);
+                var licenseInfo = LicenseKey.GetLicenseeInfo();
+                logger.Info($"Successfully load the {licenseInfo[8]} iText license granted for company {licenseInfo[2]}, with name {licenseInfo[0]}," +
+                            $" email {licenseInfo[1]}, having version {licenseInfo[6]} and producer line {licenseInfo[4]}. Is license expired: {licenseInfo[7]}.");
+            }
+            catch (Exception e)
+            {
+               logger.Error($"Failed to load the iText license: {e}");
+            }
         }
 
         public SignatureResult SignWithStaticCertificate(List<PdfHandle> documentHandles, UserData userData)
@@ -90,7 +108,6 @@ namespace AIS
 
         private SignatureResult PerformSigning(SignRequestDetails details)
         {
-            // TODO - check license
             Trace trace = new Trace(details.UserData.TransactionId);
             details.UserData.ValidatePropertiesForSignature(details.SignatureMode, trace);
             details.DocumentHandles.ForEach(dh => dh.ValidateYourself(trace));

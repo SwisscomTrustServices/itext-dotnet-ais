@@ -63,6 +63,9 @@
     <Reference Include="itext.layout, Version=7.1.14.0, Culture=neutral, PublicKeyToken=8354ae6d2174ddca, processorArchitecture=MSIL">
       <HintPath>..\packages\itext7.7.1.14\lib\net40\itext.layout.dll</HintPath>
     </Reference>
+    <Reference Include="itext.licensekey, Version=3.1.4.0, Culture=neutral, PublicKeyToken=8354ae6d2174ddca, processorArchitecture=MSIL">
+      <HintPath>..\packages\itext7.licensekey.3.1.4\lib\net45\itext.licensekey.dll</HintPath>
+    </Reference>
     <Reference Include="itext.pdfa, Version=7.1.14.0, Culture=neutral, PublicKeyToken=8354ae6d2174ddca, processorArchitecture=MSIL">
       <HintPath>..\packages\itext7.7.1.14\lib\net40\itext.pdfa.dll</HintPath>
     </Reference>
@@ -89,6 +92,11 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="TestFullyProgramaticConfiguration.cs" />
+    <Compile Include="TestOnDemandSignature.cs" />
+    <Compile Include="TestStaticSignature.cs" />
+    <Compile Include="TestOnDemandSignatureWithStepUp.cs" />
+    <Compile Include="TestTimestampSignature.cs" />
     <Compile Include="SignatureTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

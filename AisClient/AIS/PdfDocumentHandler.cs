@@ -7,9 +7,9 @@ using AIS.Model;
 using AIS.Model.Rest;
 using AIS.Sign;
 using AIS.Utils;
+using Common.Logging;
 using iText.Kernel.Pdf;
 using iText.Signatures;
-using Org.BouncyCastle.Asn1.X509;
 using Org.BouncyCastle.Ocsp;
 using Org.BouncyCastle.X509;
 using static System.String;
@@ -26,6 +26,7 @@ namespace AIS
 
         public DigestAlgorithm DigestAlgorithm { get; set; }
 
+        private static ILog logger = LogManager.GetLogger<PdfDocumentHandler>();
         private const string Delimiter = ";";
         private byte[] contentIn;
         private Trace trace;
@@ -81,10 +82,8 @@ namespace AIS
                 throw new AisClientException($"Could not apply signature because source file contains a certification " +
                                     $"that does not allow any changes to the document with id {Id}");
             }
-
-            //TODO - log message
-            string message = "Signature size [estimated: {}" + Delimiter + "actual: {}" + Delimiter + "remaining: {}" +
-                             "] - {}";
+            logger.Debug($"Signature size [estimated: {estimatedSize}" + Delimiter + $"actual: {externalsignature.Length}" + Delimiter + 
+                         $"remaining: {estimatedSize-externalsignature.Length}" + $"] - {trace.Id}");
             if (estimatedSize < externalsignature.Length)
             {
                 throw new AisClientException($"Not enough space for signature in the document with id {trace.Id}. The estimated size needs to be " +
@@ -101,7 +100,7 @@ namespace AIS
                 }
                 else
                 {
-                    //TODO log info
+                    logger.Info($"No CRL and OCSP entries were received to be embedded into the PDF - {trace.Id}");
                     File.WriteAllBytes(outputFile, inMemoryStream.ToArray());
                 }
 
@@ -130,14 +129,26 @@ namespace AIS
                 LtvVerification validation = new LtvVerification(document);
                 IList<string> signatureNames = new SignatureUtil(document).GetSignatureNames();
                 string signatureName = signatureNames[signatureNames.Count - 1];
-                bool x = validation.AddVerification(signatureName, ocsp, crl, null);
+                bool isSignatureVerificationAdded = validation.AddVerification(signatureName, ocsp, crl, null);
                 validation.Merge();
                 document.Close();
-                //TODO log
+                LogSignatureVerificationInfo(isSignatureVerificationAdded);
             }
             catch (Exception e)
             {
                 throw new AisClientException($"Failed to embed the signature(s) in the document(s) and close the streams - {trace.Id}");
+            }
+        }
+
+        private void LogSignatureVerificationInfo(bool isSignatureVerificationAdded)
+        {
+            if (isSignatureVerificationAdded)
+            {
+                logger.Info($"Merged LTV validation information to the output stream - {trace.Id}");
+            }
+            else
+            {
+                logger.Warn($"Failed to merge LTV validation information to the output stream - {trace.Id}");
             }
         }
 
@@ -156,13 +167,24 @@ namespace AIS
             {
                 MemoryStream inputStream = new MemoryStream(Convert.FromBase64String(encodedCrl));
                 X509Crl x509Crl = new X509CrlParser().ReadCrl(inputStream);
-                //TODO log
+                LogCrlInfo(x509Crl);
                 return x509Crl.GetEncoded();
             }
             catch (Exception e)
             {
                 throw new AisClientException($"Failed to map the received encoded CRL entry - {trace.Id}", e);
             }
+        }
+
+        private void LogCrlInfo(X509Crl x509Crl)
+        {
+            int revokedCertificatesNo = x509Crl?.GetRevokedCertificates().Count ?? 0;
+            logger.Debug("Embedding CRL response... ["
+                         + "IssuerDN: " + x509Crl.IssuerDN + Delimiter
+                         + "This update: " + x509Crl.ThisUpdate + Delimiter
+                         + "Next update: " + x509Crl.NextUpdate + Delimiter
+                         + "No. of revoked certificates: " + revokedCertificatesNo
+                         + "] - " + trace.Id);
         }
 
         private byte[] MapEncodedOcsp(String encodedOcsp)
@@ -172,13 +194,28 @@ namespace AIS
                 MemoryStream inputStream = new MemoryStream(Convert.FromBase64String(encodedOcsp));
                 OcspResp ocspResp = new OcspResp(inputStream);
                 BasicOcspResp basicOcspResp = (BasicOcspResp)ocspResp.GetResponseObject();
-                //TODO log
+                LogOcspInfo(ocspResp, basicOcspResp);
                 return basicOcspResp.GetEncoded();
             }
             catch (Exception e)
             {
                 throw new AisClientException($"Failed to map the received encoded OCSP entry - {trace.Id}", e);
             }
+        }
+
+        private void LogOcspInfo(OcspResp ocspResp, BasicOcspResp basicResp)
+        {
+            SingleResp response = basicResp.Responses[0];
+            var serialNumber = response.GetCertID().SerialNumber;
+            var firstCertificate = basicResp.GetCerts()[0];
+            logger.Debug("Embedding OCSP response... [Status: " + (ocspResp.Status == 0 ? "OK" : "NOK") + Delimiter
+                         + "Produced at: " + basicResp.ProducedAt + Delimiter
+                         + "This update: " + response.ThisUpdate + Delimiter
+                         + "Next update: " + response.NextUpdate + Delimiter
+                         + "X509 cert issuer: " + firstCertificate.IssuerDN + Delimiter
+                         + "X509 cert subject: " + firstCertificate.SubjectDN + Delimiter
+                         + "Certificate ID: " + serialNumber + "(" + serialNumber.ToString(16).ToUpper() + ")"
+                         + "] - " + trace.Id);
         }
 
         public void Close()
@@ -196,7 +233,7 @@ namespace AIS
             }
             catch (Exception e)
             {
-               // TODO processingLogger.debug("Failed to close the resource - {}. Reason: {}", trace.getId(), e.getMessage());
+               logger.Debug($"Failed to close the resource - {trace.Id}. Reason: {e.Message}");
             }
         }
     }

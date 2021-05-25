@@ -29,7 +29,7 @@ namespace AIS
 
             SignaturePollingIntervalInSeconds = ConfigParser.GetIntNotNull("ClientPollIntervalInSeconds", configuration.ClientPollIntervalInSeconds);
             SignaturePollingRounds = ConfigParser.GetIntNotNull("ClientPollRounds", configuration.ClientPollRounds);
-          //  LicenseFilePath = ConfigParser.GetStringNotNull("ITextLicenseFilePath", configuration.ITextLicenseFilePath); TODO
+            LicenseFilePath = configuration.ITextLicenseFilePath;
             ValidateFieldVales();
         }
 

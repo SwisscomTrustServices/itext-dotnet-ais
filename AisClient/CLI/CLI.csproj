@@ -61,6 +61,9 @@
     <Reference Include="itext.layout, Version=7.1.14.0, Culture=neutral, PublicKeyToken=8354ae6d2174ddca, processorArchitecture=MSIL">
       <HintPath>..\packages\itext7.7.1.14\lib\net40\itext.layout.dll</HintPath>
     </Reference>
+    <Reference Include="itext.licensekey, Version=3.1.4.0, Culture=neutral, PublicKeyToken=8354ae6d2174ddca, processorArchitecture=MSIL">
+      <HintPath>..\packages\itext7.licensekey.3.1.4\lib\net45\itext.licensekey.dll</HintPath>
+    </Reference>
     <Reference Include="itext.pdfa, Version=7.1.14.0, Culture=neutral, PublicKeyToken=8354ae6d2174ddca, processorArchitecture=MSIL">
       <HintPath>..\packages\itext7.7.1.14\lib\net40\itext.pdfa.dll</HintPath>
     </Reference>
@@ -121,7 +124,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Program.cs" />
+    <Compile Include="ArgumentsDto.cs" />
+    <Compile Include="ArgumentsService.cs" />
+    <Compile Include="CLI.cs" />
+    <Compile Include="CliArgument.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
