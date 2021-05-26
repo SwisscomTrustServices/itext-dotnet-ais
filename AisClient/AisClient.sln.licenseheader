@@ -1,4 +1,6 @@
-﻿/*
+﻿extensions: designer.cs generated.cs
+extensions: .cs .cpp .h
+/*
  * Copyright 2021 Swisscom Trust Services (Schweiz) AG
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,13 +15,3 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-using Newtonsoft.Json;
-
-namespace AIS.Model.Rest.SignResponse
-{
-    public class ScStepUpAuthorisationInfo
-    {
-        [JsonProperty("sc.Result")]
-        public ScResult ScResult { get; set; }
-    }
-}
