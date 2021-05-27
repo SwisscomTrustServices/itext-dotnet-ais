@@ -45,19 +45,11 @@ namespace AIS.Rest
         {
             configuration = restClientConfiguration;
             client = BuildHttpClient();
-            ConfigureConnections();
             if (configuration.SkipServerCertificateValidation)
             {
                 ServicePointManager.ServerCertificateValidationCallback += (sender, cert, chain, sslPolicyErrors) => true;
             }
-        }
-
-        private void ConfigureConnections()
-        {
-            if (configuration.SkipServerCertificateValidation)
-            {
-                ServicePointManager.ServerCertificateValidationCallback += (sender, cert, chain, sslPolicyErrors) => true;
-            }
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Ssl3 | SecurityProtocolType.Tls | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12;
         }
 
         private  HttpClient BuildHttpClient()
