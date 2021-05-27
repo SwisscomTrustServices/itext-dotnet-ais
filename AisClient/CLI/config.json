@@ -2,7 +2,7 @@
 	"ITextLicenseFilePath": "d:/home/user/license-file.txt",
 	"ServerRestSignUrl": "https://ais.swisscom.com/AIS-Server/rs/v1.0/sign",
 	"ServerRestPendingUrl": "https://ais.swisscom.com/AIS-Server/rs/v1.0/pending",
-	"ServerCertFile": "d:/home/user/ais-server.crt",
+	"SkipServerCertificateValidation": true,
 	"ClientAuthKeyFile": "d:/home/user/ais-client.key",
 	"ClientAuthKeyPassword": "secret",
 	"ClientCertFile": "d:/home/user/ais-client.crt",
@@ -25,6 +25,7 @@
 	"SignatureName": "TEST Signer",
 	"SignatureReason": "Testing signature",
 	"SignatureLocation": "Testing location",
-	"SignatureContactInfo": "tester.test@test.com"
-
+	"SignatureContactInfo": "tester.test@test.com",
+  "LocalTestInputFile": "in.pdf",
+  "LocalTestOutputFile": "out.pdf"
 }
