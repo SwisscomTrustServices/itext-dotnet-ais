@@ -1,0 +1,31 @@
+--------------------------------------------------------------------------------
+Swisscom AIS Client
+--------------------------------------------------------------------------------
+Usage: .\CLI.exe [OPTIONS]
+
+Options:
+
+    -input [FILE]                                       - Source PDF file to sign. You can use this parameter several times, to sign multiple
+                                                          documents at once. Using multiple inputs forces the usage of suffix (see below) as it is
+                                                          difficult to give both the input and the output files as parameters.
+
+    -output [FILE]                                      - Output PDF file, where the signed document should be written. This parameter can be
+                                                          used only when one single input is given. For more than one input, use suffix.
+
+    -suffix [SUFFIX]                                    - Suffix for output file(s), composed using the input file plus the suffix, as alternative to
+                                                          specifying the output file entirely. Default is "signed-#time", where "#time" is replaced
+                                                          with current time (hhMMss).
+
+    -type [static|ondemand|ondemand-stepup|timestamp]   - The type of signature to create
+
+    -config [PROPERTIES FILE]                           - The properties file that provides the extra configuration parameters. A sample configuration is provided in config.json
+
+    -help                                               - This help text
+
+    -v                                                  - Be verbose. Sets logging to DEBUG. By default logging is set to INFO 
+
+
+Sample use cases:
+    1. Edit the config.json file accordingly
+    2. > .\CLI.exe -type timestamp -config config.json -input fileIn.pdf -output fileOut.pdf
+    3. > .\CLI.exe -type timestamp -config config.json -input file1.pdf -input file2.pdf -input file3.pdf -v
