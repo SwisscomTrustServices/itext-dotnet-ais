@@ -62,6 +62,14 @@ is replaced at runtime with the current date and time). You can customize this s
 .\CLI.exe -type ondemand-stepup -config config.json -input doc1.pdf -suffix -output-#time 
 ```
 
+### Notes for command line usage
+
+* The command starts with CLI.exe ….. instead of the various shell scripts used for Java.
+* There is no -init command as the sample config folder is supplied along the executable(“config.json”) and the .NET does not have other config files like java(e.g., logback).
+* The verbosity is in 2 layers. Either use “-v” for verbose or without it for less info.
+* The -config argument should always be used. You can supply any name for the config file you like, but the .NET doesn’t assume a default config file and location like Java.
+
+
 ### Programmatic usage
 Once you add the AIS client library as a dependency to your project, you can configure it in the following way(the same is demostrated in Tests\TestFullyProgramaticConfiguration):
 ```C#
