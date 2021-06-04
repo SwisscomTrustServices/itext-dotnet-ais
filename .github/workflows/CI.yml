@@ -1,0 +1,55 @@
+name: CI
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+jobs:
+  release:
+    name: Relase to GitHub releases
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Download Artifact
+        uses: actions/download-artifact@v2.0.9
+        with:
+          name: release-artifacts
+      - name: Zip Release
+        uses: TheDoctor0/zip-release@0.4.2
+        with:
+          filename: Release.zip
+      - name: Create GitHub Release
+        id: create-new-release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v1.${{ github.run_number }}.0
+          release_name: v1.${{ github.run_number }}.0
+      - name: Upload Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create-new-release.outputs.upload_url }} 
+          asset_path: ./Release.zip
+          asset_name: itext7-ais-v1.${{ github.run_number }}.0.zip
+          asset_content_type: application/zip  
+  build:
+    runs-on: [windows-latest]
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v2
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v1
+      - name: Setup NuGet.exe
+        uses: NuGet/setup-nuget@v1.0.5        
+      - name: Restore NuGet Packages
+        run: nuget restore AisClient/AisClient.sln       
+      - name: Build Solution
+        run: msbuild AisClient/AisClient.sln /p:Configuration=Release
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v2.2.3
+        with:
+          name: release-artifacts
+          path: AisClient/CLI/bin/Release/
