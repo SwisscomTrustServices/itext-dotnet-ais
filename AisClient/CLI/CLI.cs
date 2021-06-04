@@ -33,9 +33,6 @@ namespace CLI
         private const string TypeOnDemandStepUp = "ondemand-stepup";
         private const string TypeTimestamp = "timestamp";
 
-        //private static ClientVersionProvider versionProvider;
-
-
         private static ILog logger;
 
         static void Main(string[] args)
@@ -49,7 +46,6 @@ namespace CLI
             ConfigureLogging(arguments.LogLevel);
             LogStartingParameters(arguments);
             SignDocuments(arguments);
-            //TODO versioning
         }
 
         private static void ConfigureLogging(LogLevel logLevel)
