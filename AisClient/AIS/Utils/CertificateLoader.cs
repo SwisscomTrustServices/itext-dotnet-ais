@@ -59,12 +59,22 @@ namespace AIS.Utils
 
         private AsymmetricKeyParameter ReadPrivateKey(CertificateConfiguration certificateConfiguration)
         {
-
-            using (TextReader privateKeyTextReader = new StringReader(File.ReadAllText(certificateConfiguration.PrivateKeyFile)))
+            var key = File.ReadAllText(certificateConfiguration.PrivateKeyFile);
+            var trimmedKey = key.Substring(key.IndexOf("-----BEGIN", StringComparison.Ordinal));
+            using (TextReader privateKeyTextReader = new StringReader(trimmedKey))
             {
                 var reader = new PemReader(privateKeyTextReader, new PasswordFinder(certificateConfiguration.Password));
-                var readKeyPair = (AsymmetricCipherKeyPair)reader.ReadObject();
-                return readKeyPair.Private;
+                var obj = reader.ReadObject();
+                if (obj is AsymmetricKeyParameter)
+                {
+                    return obj as AsymmetricKeyParameter;
+                }
+                if (obj is AsymmetricCipherKeyPair)
+                {
+                    var pair = obj as AsymmetricCipherKeyPair;
+                    return pair.Private;
+                }
+                return null;
             }
         }
     }
