@@ -193,7 +193,7 @@ namespace AIS
 
         private void LogCrlInfo(X509Crl x509Crl)
         {
-            int revokedCertificatesNo = x509Crl?.GetRevokedCertificates().Count ?? 0;
+            int revokedCertificatesNo = x509Crl?.GetRevokedCertificates()?.Count ?? 0;
             logger.Debug("Embedding CRL response... ["
                          + "IssuerDN: " + x509Crl.IssuerDN + Delimiter
                          + "This update: " + x509Crl.ThisUpdate + Delimiter
