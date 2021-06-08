@@ -87,7 +87,7 @@ namespace AIS.Model
             SignatureContactInfo = configuration.SignatureContactInfo;
             SignatureStandard = new SignatureStandard(configuration.SignatureStandard);
             RevocationInformation = new RevocationInformation(configuration.SignatureRevocationInformation);
-            if (!bool.TryParse(configuration.SignatureAddTimestamp, out var value))
+            if (bool.TryParse(configuration.SignatureAddTimestamp, out var value))
             {
                 addTimestamp = value;
             }
