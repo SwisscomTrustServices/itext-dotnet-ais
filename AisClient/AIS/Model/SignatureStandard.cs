@@ -15,6 +15,7 @@
  */
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace AIS.Model
 {
@@ -73,7 +74,7 @@ namespace AIS.Model
         public SignatureStandard(string value)
         {
 
-            if (!string.IsNullOrEmpty(value) && SignatureStandards.Contains(value))
+            if (!string.IsNullOrEmpty(value) && SignatureStandards.Any(ss => ss.Equals(value, StringComparison.OrdinalIgnoreCase)))
             {
                 Value = value;
             }

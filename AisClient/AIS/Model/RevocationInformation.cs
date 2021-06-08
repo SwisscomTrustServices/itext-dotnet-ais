@@ -15,6 +15,7 @@
  */
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace AIS.Model
 {
@@ -86,7 +87,7 @@ namespace AIS.Model
 
         public RevocationInformation(string value)
         {
-            if (!string.IsNullOrEmpty(value) && RevocationInformations.Contains(value))
+            if (!string.IsNullOrEmpty(value) && RevocationInformations.Any(ri => ri.Equals(value, StringComparison.OrdinalIgnoreCase)))
             {
                 Value = value;
             }
