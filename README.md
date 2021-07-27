@@ -8,13 +8,14 @@ It relies on the [iText](https://itextpdf.com/en) library for PDF processing.
 
 The standalone client library is available as a [nuget package](https://www.nuget.org/packages/TrustServices.AIS.Net.Client/) to refrence in your projects. 
 
-## Demo Video
+## .Net AIS Client Video Demo
+
+[![Watcht the video](https://i.imgur.com/DsSRUjW.png)](https://youtu.be/iXJJWOIvBXc)
+
+or see it on SharePoint:
 
 * https://swisscom-my.sharepoint.com/:v:/p/paul_muntean/EQG2JYWKJvFHqiwefyQGiQgBBITIJt2PHkxH9zs-MdbcJw?e=pjqaoE
 
-or alternativelly if you cannot access the first link, you need to download the raw video file using the following link.
-
-* https://github.com/SwisscomTrustServices/itext-dotnet-ais/blob/main/Demo%20the%20.Net%20client.mp4
 
 ## Getting started
 
