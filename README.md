@@ -1,4 +1,4 @@
-# Swisscom iText7 AIS .NET Client
+# iText7 and .NET based AIS Client
 
 A .NET Standard client library and a CLI wrapper for using the [Swisscom All-in Signing Service (AIS)](https://www.swisscom.ch/en/business/enterprise/offer/security/all-in-signing-service.html)
 to sign and/or timestamp PDF documents. The library(AIS project) can be used as a project dependency. You can also use the CLI wrapper as a command-line tool for batch operations.
